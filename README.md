@@ -14,7 +14,7 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
 
 元に戻すときは、コピーしたファイルとフォルダを削除します。詳しくは ZIP 内の `avernum_jp/README.txt` か紹介ページを見てください。
 
-対応は Steam 版（Windows）のみです。ゲームの元のファイルは書き換えません。初回の起動時に DLL が手元のファイルと差分
+動作確認は Steam 版（Windows）で行っています。GOG 版など他のストアの版でも動くように作ってありますが未確認です（対応できない版では日本語化を自動で止め、英語のまま起動します）。ゲームの元のファイルは書き換えません。初回の起動時に DLL が手元のファイルと差分
 （`avernum_jp/jp_patch.bin`）から日本語版を `avernum_jp/cache/` に作り、ゲームが読むファイルをそちらに差し替えます。
 
 ## 翻訳の規模
@@ -33,7 +33,7 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
 | `exe_strings.tsv` | 実行ファイル内の文字列の訳（ゲームには `avernum_jp_exe.tsv` として置く） |
 | `trans/` | スクリプト本文の訳（`ja/`）、用語集、口調メモ、文体の決まり（`STYLE.md`） |
 | `trans_exe/`, `trans_scen/` | 実行ファイルの文字列とシナリオデータの訳 |
-| `tools/` | 抽出・検査・組み込み・画像生成・パッチ作成のツール（Python） |
+| `tools/` | 抽出・検査・組み込み・画像生成・パッチ作成のツール（Python）。`gen_patterns.py` は DLL が書き換え位置を探すためのパターンを作る |
 | `dist_src/` | 配布 ZIP の説明書と設定ファイル |
 | `docs/` | 紹介ページ（GitHub Pages） |
 
@@ -45,7 +45,7 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
 
 ## 配布 ZIP の作り方
 ```
-python -I tools/build_release.py <元のファイルのフォルダ> <日本語化したファイルのフォルダ> <出力先> v0.9.1 https://higesho.github.io/avernum-efp-jp/
+python -I tools/build_release.py <元のファイルのフォルダ> <日本語化したファイルのフォルダ> <出力先> v0.9.2 https://higesho.github.io/avernum-efp-jp/
 ```
 `tools/make_patch.py` が元のファイルとの差分（`avernum_jp/jp_patch.bin`）を作ります。文章は差分として翻訳部分だけを、
 画像は元の画像との差として持つため、ZIP 単体ではゲームの内容を取り出せません。

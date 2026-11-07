@@ -32,25 +32,49 @@
 static BYTE *g_base;
 #define VA(x) ((void *)(g_base + ((DWORD)(x) - 0x400000)))
 
-#define A_DRAW_TEXT_RECT 0x493e80 /* replaced */
-#define A_DRAW_ASCII 0x496500     /* cdecl (char*, r, g, b), pen at globals */
-#define A_BLIT 0x406a90           /* edi = texture obj, cdecl 7 args */
-#define A_OFFSET_RECT 0x498060    /* eax = rect*, cdecl (a, b) */
-#define A_PEN_X 0x6a9b94
-#define A_PEN_Y 0x6a9b98
-#define A_CUR_FONT 0x6a9b90
-#define A_LINE_ACC 0x6a9980
-#define A_RECT_OFF_X 0x6a9984
-#define A_RECT_OFF_Y 0x6a9b88
-#define A_ORIGIN_A 0x6a90a8
-#define A_ORIGIN_B 0x6a90ac
-#define A_COLOR_R 0x5fffa4
-#define A_COLOR_G 0x5fffa8
-#define A_COLOR_B 0x5fffac
-#define A_CHARMAP 0x5ed020
-#define A_FONT_TEX 0x6a9da0
-#define A_BOUND_TEX_CACHE 0x5ec09c
-#define A_FONT0 0x5ec0c8
+// Every address the DLL uses is located at start-up with the byte patterns in
+// resolve_addresses() (tools/gen_patterns.py makes them), so that other builds of the
+// game (other stores) can work too. The values below are those of the Steam build;
+// there each pattern is checked at that exact place first. They are kept as
+// unrelocated VAs (0x4xxxxx); VA() adds the load base.
+enum
+{
+    I_DRAW_TEXT, I_DRAW_ASCII, I_BLIT, I_OFFSET_RECT, I_PEN_X, I_PEN_Y, I_CUR_FONT, I_LINE_ACC,
+    I_RECT_OFF_X, I_RECT_OFF_Y, I_ORIGIN_A, I_ORIGIN_B, I_COLOR_R, I_COLOR_G, I_COLOR_B, I_CHARMAP,
+    I_FONT_TEX, I_BOUND_TEX_CACHE, I_FONT0, I_SPRINTF, I_NAMED_PUSH, I_NAMED_CALL, I_FMT_S_SPACE_S,
+    I_TOKCLASS, I_TOK_DIGIT, I_TOK_OTHER, I_TOK_LETTER, I_COUNT
+};
+static const char *const kAddrName[I_COUNT] = {
+    "draw_text", "draw_ascii", "blit", "offset_rect", "pen_x", "pen_y", "cur_font", "line_acc",
+    "rect_off_x", "rect_off_y", "origin_a", "origin_b", "color_r", "color_g", "color_b", "charmap",
+    "font_tex", "bound_tex_cache", "font0", "sprintf", "named_push", "named_call", "fmt_s_space_s",
+    "tok_class", "tok_digit", "tok_other", "tok_letter"};
+static const DWORD kSteamVa[I_COUNT] = {
+    0x493e80, 0x496500, 0x406a90, 0x498060, 0x6a9b94, 0x6a9b98, 0x6a9b90, 0x6a9980,
+    0x6a9984, 0x6a9b88, 0x6a90a8, 0x6a90ac, 0x5fffa4, 0x5fffa8, 0x5fffac, 0x5ed020,
+    0x6a9da0, 0x5ec09c, 0x5ec0c8, 0x4ceeb5, 0x47bcfc, 0x47bd02, 0x5d2aa0,
+    0x46ed1a, 0x46ed22, 0x46ed29, 0x46ed4a};
+static DWORD g_va[I_COUNT]; // found addresses (0 = not found)
+
+#define A_DRAW_TEXT_RECT g_va[I_DRAW_TEXT] /* replaced */
+#define A_DRAW_ASCII g_va[I_DRAW_ASCII]    /* cdecl (char*, r, g, b), pen at globals */
+#define A_BLIT g_va[I_BLIT]                /* edi = texture obj, cdecl 7 args */
+#define A_OFFSET_RECT g_va[I_OFFSET_RECT]  /* eax = rect*, cdecl (a, b) */
+#define A_PEN_X g_va[I_PEN_X]
+#define A_PEN_Y g_va[I_PEN_Y]
+#define A_CUR_FONT g_va[I_CUR_FONT]
+#define A_LINE_ACC g_va[I_LINE_ACC]
+#define A_RECT_OFF_X g_va[I_RECT_OFF_X]
+#define A_RECT_OFF_Y g_va[I_RECT_OFF_Y]
+#define A_ORIGIN_A g_va[I_ORIGIN_A]
+#define A_ORIGIN_B g_va[I_ORIGIN_B]
+#define A_COLOR_R g_va[I_COLOR_R]
+#define A_COLOR_G g_va[I_COLOR_G]
+#define A_COLOR_B g_va[I_COLOR_B]
+#define A_CHARMAP g_va[I_CHARMAP]
+#define A_FONT_TEX g_va[I_FONT_TEX]
+#define A_BOUND_TEX_CACHE g_va[I_BOUND_TEX_CACHE]
+#define A_FONT0 g_va[I_FONT0] /* five fonts, FONT_STRIDE apart */
 #define FONT_STRIDE 0x310
 
 #define TEXOBJ_SIZE 0x170
@@ -566,11 +590,11 @@ static void __cdecl my_draw_text(int mode, const char *str, int code, int r, int
 
     switch (code)
     {
-    case 14: font = (BYTE *)VA(0x5ec6e8); break;
-    case 15: font = (BYTE *)VA(0x5ec3d8); break;
-    case 16: case 18: font = (BYTE *)VA(0x5ec9f8); code = 16; break;
-    case 20: case 22: case 24: font = (BYTE *)VA(0x5ecd08); code = 24; break;
-    default: font = (BYTE *)VA(0x5ec0c8); code = 12; break;
+    case 14: font = (BYTE *)VA(A_FONT0 + 2 * FONT_STRIDE); break;
+    case 15: font = (BYTE *)VA(A_FONT0 + 1 * FONT_STRIDE); break;
+    case 16: case 18: font = (BYTE *)VA(A_FONT0 + 3 * FONT_STRIDE); code = 16; break;
+    case 20: case 22: case 24: font = (BYTE *)VA(A_FONT0 + 4 * FONT_STRIDE); code = 24; break;
+    default: font = (BYTE *)VA(A_FONT0); code = 12; break;
     }
     lh = code + 1;
     *(BYTE **)VA(A_CUR_FONT) = (BYTE *)font;
@@ -674,8 +698,11 @@ __declspec(naked) static void hook_stub(void)
 
 static void install(void)
 {
-    BYTE *target = (BYTE *)VA(A_DRAW_TEXT_RECT);
+    BYTE *target;
     DWORD old;
+    if (!A_DRAW_TEXT_RECT)
+        return;
+    target = (BYTE *)VA(A_DRAW_TEXT_RECT);
     if (memcmp(target, kExpectedPrologue, sizeof kExpectedPrologue) != 0)
     {
         jp_log("unexpected code at draw_text_rect; game version mismatch, hook NOT installed\n");
@@ -697,7 +724,7 @@ static void install(void)
 // immediates and data tables, found via the exe's base relocation table) so it
 // points at the translated string instead. The exe file itself is untouched.
 
-#define A_SPRINTF 0x4ceeb5
+#define A_SPRINTF g_va[I_SPRINTF]
 static const BYTE kSprintfPrologue[] = {0x8B, 0xFF, 0x55, 0x8B, 0xEC};
 
 typedef struct
@@ -777,6 +804,7 @@ static char *to_game_encoding(const char *utf8, int *unmappable)
 }
 
 static int g_needPositional;
+static int g_forceScan; // [debug] force_scan=1: search everything as for another build (tests the search)
 
 static int __cdecl my_sprintf(char *buf, const char *fmt, ...)
 {
@@ -793,8 +821,14 @@ static int __cdecl my_sprintf(char *buf, const char *fmt, ...)
 
 static void install_sprintf_hook(void)
 {
-    BYTE *target = (BYTE *)VA(A_SPRINTF);
+    BYTE *target;
     DWORD old;
+    if (!A_SPRINTF)
+    {
+        jp_log("sprintf not found; positional formats NOT supported\n");
+        return;
+    }
+    target = (BYTE *)VA(A_SPRINTF);
     if (memcmp(target, kSprintfPrologue, sizeof kSprintfPrologue) != 0)
     {
         jp_log("unexpected code at sprintf; positional formats NOT supported\n");
@@ -820,8 +854,98 @@ static int is_positional(const char *s)
     return 0;
 }
 
+// Other builds keep the same strings at other addresses. A string is identified by its
+// text and by how many relocated pointers refer to it (the "refs" column, counted in
+// the Steam build), so short texts that also occur as plain data are not mistaken.
+static DWORD *g_relocTargets; // values of all relocated pointers, sorted
+static int g_relocCount;
+
+static int cmp_dword(const void *a, const void *b)
+{
+    DWORD x = *(const DWORD *)a, y = *(const DWORD *)b;
+    return x < y ? -1 : x > y;
+}
+
+static void build_reloc_targets(void)
+{
+    IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)g_base;
+    IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(g_base + dos->e_lfanew);
+    IMAGE_DATA_DIRECTORY *rd = &nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+    BYTE *rel = g_base + rd->VirtualAddress, *end = rel + rd->Size;
+    int cap = rd->Size / 2 + 1;
+    g_relocTargets = (DWORD *)malloc(cap * sizeof(DWORD));
+    g_relocCount = 0;
+    while (g_relocTargets && rd->VirtualAddress && rel < end)
+    {
+        IMAGE_BASE_RELOCATION *blk = (IMAGE_BASE_RELOCATION *)rel;
+        WORD *e = (WORD *)(blk + 1);
+        int n = (blk->SizeOfBlock - sizeof *blk) / 2, i;
+        if (blk->SizeOfBlock < sizeof *blk)
+            break;
+        for (i = 0; i < n && g_relocCount < cap; i++)
+            if ((e[i] >> 12) == IMAGE_REL_BASED_HIGHLOW)
+                g_relocTargets[g_relocCount++] = *(DWORD *)(g_base + blk->VirtualAddress + (e[i] & 0xfff));
+        rel += blk->SizeOfBlock;
+    }
+    if (g_relocTargets)
+        qsort(g_relocTargets, g_relocCount, sizeof(DWORD), cmp_dword);
+}
+
+static int reloc_refs(DWORD ptr)
+{
+    int lo = 0, hi = g_relocCount, n = 0;
+    while (lo < hi)
+    {
+        int mid = (lo + hi) / 2;
+        if (g_relocTargets[mid] < ptr)
+            lo = mid + 1;
+        else
+            hi = mid;
+    }
+    while (lo + n < g_relocCount && g_relocTargets[lo + n] == ptr)
+        n++;
+    return n;
+}
+
+// Returns the RVA of a whole NUL-terminated occurrence of s in the data sections with
+// exactly `refs` references (refs < 0: any number above zero) that is not in used[].
+static DWORD find_string_rva(const char *s, int refs, const DWORD *used, int nUsed)
+{
+    IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)g_base;
+    IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(g_base + dos->e_lfanew);
+    IMAGE_SECTION_HEADER *sec = IMAGE_FIRST_SECTION(nt);
+    size_t len = strlen(s);
+    int i, j, r;
+    if (!len)
+        return 0;
+    if (!g_relocTargets)
+        build_reloc_targets();
+    for (i = 0; i < nt->FileHeader.NumberOfSections; i++)
+    {
+        BYTE *a, *p, *end;
+        if ((sec[i].Characteristics & IMAGE_SCN_CNT_CODE) || !(sec[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA))
+            continue;
+        a = g_base + sec[i].VirtualAddress;
+        end = a + min(sec[i].Misc.VirtualSize, sec[i].SizeOfRawData);
+        for (p = a; p + len < end; p++)
+            if (*p == (BYTE)s[0] && (p == a || p[-1] == 0) && p[len] == 0 && memcmp(p, s, len) == 0)
+            {
+                DWORD rva = (DWORD)(p - g_base);
+                r = reloc_refs((DWORD)p);
+                for (j = 0; j < nUsed && used[j] != rva; j++)
+                    ;
+                if (j == nUsed && (refs < 0 ? r > 0 : r == refs))
+                    return rva;
+                p += len;
+            }
+    }
+    return 0;
+}
+
 static void load_exe_strings(const char *dir)
 {
+    DWORD *used = (DWORD *)calloc(4096, sizeof(DWORD)); // RVAs of strings already taken
+    int nUsed = 0, foundBySearch = 0;
     char path[MAX_PATH];
     FILE *f;
     long size;
@@ -836,6 +960,7 @@ static void load_exe_strings(const char *dir)
     if (!f)
     {
         jp_log("no %s (exe strings stay English)\n", path);
+        free(used);
         return;
     }
     fseek(f, 0, SEEK_END);
@@ -873,12 +998,23 @@ static void load_exe_strings(const char *dir)
         unescape(col[4]);
         va = strtoul(col[0], NULL, 16);
         rva = va - 0x400000;
-        if (va < 0x400000 || rva >= imageSize || strcmp((char *)g_base + rva, col[3]) != 0)
+        if (g_forceScan || va < 0x400000 || rva >= imageSize || strcmp((char *)g_base + rva, col[3]) != 0)
         {
-            jp_log("exe_tsv line %d: English text does not match exe at %s, skipped\n", lineno, col[0]);
-            skipped++;
-            continue;
+            // not at the Steam build's address: look for the same text elsewhere
+            char *e;
+            long refs = strtol(col[2], &e, 10);
+            rva = find_string_rva(col[3], (e != col[2] && refs > 0) ? (int)refs : -1, used, nUsed);
+            if (!rva)
+            {
+                jp_log("exe_tsv line %d: English text not found in this exe (%s), skipped\n", lineno, col[0]);
+                skipped++;
+                continue;
+            }
+            if (rva != va - 0x400000)
+                foundBySearch++;
         }
+        if (nUsed < 4096)
+            used[nUsed++] = rva;
         {
             char *jp = to_game_encoding(col[4], &unmappable);
             if (unmappable)
@@ -892,6 +1028,11 @@ static void load_exe_strings(const char *dir)
         }
     }
     free(buf);
+    free(used);
+    free(g_relocTargets);
+    g_relocTargets = NULL;
+    if (foundBySearch)
+        jp_log("exe strings: %d found at other addresses than in the Steam build\n", foundBySearch);
 
     // Walk the exe's base relocations and redirect every pointer to a translated string.
     {
@@ -958,7 +1099,7 @@ HRESULT WINAPI DirectSoundCreate(const GUID *dev, void **out, void *outer)
 // allocation fails and the CRT aborts. The real token count does not change (a
 // literal is one token), so classify bytes >= 0x80 like letters.
 //   0x46ed1a: cmp al,30h / jl 46ed29 / cmp al,39h / jg 46ed29   -> jmp tok_class_stub
-#define A_TOKCLASS 0x46ed1a
+#define A_TOKCLASS g_va[I_TOKCLASS]
 static const BYTE kTokClassOrig[8] = {0x3C, 0x30, 0x7C, 0x0B, 0x3C, 0x39, 0x7F, 0x07};
 static DWORD g_tokDigit, g_tokOther, g_tokLetter; // 0x46ed22, 0x46ed29, 0x46ed4a
 
@@ -981,16 +1122,19 @@ __declspec(naked) static void tok_class_stub(void)
 
 static void install_token_estimate_fix(void)
 {
-    BYTE *p = (BYTE *)VA(A_TOKCLASS);
+    BYTE *p;
     DWORD old;
+    if (!A_TOKCLASS)
+        return;
+    p = (BYTE *)VA(A_TOKCLASS);
     if (memcmp(p, kTokClassOrig, sizeof kTokClassOrig) != 0)
     {
         jp_log("token estimate fix skipped: unexpected bytes at %06x\n", A_TOKCLASS);
         return;
     }
-    g_tokDigit = (DWORD)VA(0x46ed22);
-    g_tokOther = (DWORD)VA(0x46ed29);
-    g_tokLetter = (DWORD)VA(0x46ed4a);
+    g_tokDigit = (DWORD)VA(g_va[I_TOK_DIGIT]);
+    g_tokOther = (DWORD)VA(g_va[I_TOK_OTHER]);
+    g_tokLetter = (DWORD)VA(g_va[I_TOK_LETTER]);
     VirtualProtect(p, 8, PAGE_EXECUTE_READWRITE, &old);
     p[0] = 0xE9;
     *(DWORD *)(p + 1) = (DWORD)tok_class_stub - (DWORD)(p + 5);
@@ -1005,9 +1149,9 @@ static void install_token_estimate_fix(void)
 //   0x47bcfc: push 5d2aa0h ("%s %s") / push eax / call sprintf   (buffer: 264 bytes)
 // i.e. "<name> <text>". A Japanese text continues the name directly
 // ("<name>が応じない。"), so drop the space when the text starts with a non-ASCII byte.
-#define A_NAMED_PUSH 0x47bcfc
-#define A_NAMED_CALL 0x47bd02
-#define A_FMT_S_SPACE_S 0x5d2aa0
+#define A_NAMED_PUSH g_va[I_NAMED_PUSH]
+#define A_NAMED_CALL g_va[I_NAMED_CALL]
+#define A_FMT_S_SPACE_S g_va[I_FMT_S_SPACE_S]
 // The buffer is [ebp-108h, ebp); its last dword (ebp-4) holds the /GS cookie, so
 // stay well inside it.
 #define NAMED_BUF 256
@@ -1031,9 +1175,16 @@ static int __cdecl named_sprintf(char *buf, const char *fmt, const char *name, c
 
 static void install_named_str_fix(void)
 {
-    BYTE *push = (BYTE *)VA(A_NAMED_PUSH);
-    BYTE *call = (BYTE *)VA(A_NAMED_CALL);
+    BYTE *push, *call;
     DWORD old;
+    if (!A_NAMED_PUSH || !A_NAMED_CALL || !A_FMT_S_SPACE_S || !A_SPRINTF ||
+        strcmp((const char *)VA(A_FMT_S_SPACE_S), "%s %s") != 0)
+    {
+        jp_log("print_named_str fix skipped: code not found\n");
+        return;
+    }
+    push = (BYTE *)VA(A_NAMED_PUSH);
+    call = (BYTE *)VA(A_NAMED_CALL);
     if (push[0] != 0x68 || *(DWORD *)(push + 1) != (DWORD)VA(A_FMT_S_SPACE_S) || call[0] != 0xE8 ||
         (DWORD)(call + 5) + *(DWORD *)(call + 1) != (DWORD)VA(A_SPRINTF))
     {
@@ -1566,6 +1717,215 @@ static void prepare_redirects(const char *gameDir, const char *dataDir)
     jp_log("file redirect installed\n");
 }
 
+// ---------------------------------------------------------------- finding the hook points
+// Patterns made by tools/gen_patterns.py from the Steam build. "??" bytes are absolute
+// addresses or call targets, which differ between builds. A pattern with an anchor is
+// searched in the 0x400 bytes after the anchor's match; the others must be unique in
+// the code section.
+typedef struct
+{
+    const char *name, *anchor;
+    DWORD steamVa;
+    const char *pat;
+} Pattern;
+
+static const Pattern kPatterns[] = {
+    {"draw_text", NULL, 0x493e80,
+     "55 8B EC 81 EC 3C 08 00 00 A1 ?? ?? ?? ?? 33 C5 89 45 FC 53 33 C0 56 8B D9 8B 4D 18 8B F2 8B 55 1C 89 85 D0 F7 FF FF 89 85 CC F7 FF FF 89 85 D8 F7 FF FF 88 85 DF F7 FF FF A1 ?? ?? ?? ?? C1 E9 10 03 C8 C1 EA 10 03 D0 66 A1 ?? ?? ?? ?? 66 01 45 1C 66 01 45 18 A1 ?? ?? ?? ?? 57 8B 7D 08 66 89 4D 1A 8B 0D ?? ?? ?? ?? 50 51 8D 45 18 66 89 55 1E E8 ?? ?? ?? ??"},
+    {"font_select", "draw_text", 0x493f8f,
+     "BF 0C 00 00 00 C7 05 ?? ?? ?? ?? ?? ?? ?? ?? 47 33 C9 89 7D 08 66 89 3D ?? ?? ?? ??"},
+    {"draw_ascii", NULL, 0x496500,
+     "55 8B EC 83 EC 2C 0F B7 05 ?? ?? ?? ?? 0F B7 0D ?? ?? ?? ?? 53 56 57 8B 3D ?? ?? ?? ?? 33 DB 89 5D EC 89 45 E4 89 4D E8 81 FF ?? ?? ?? ??"},
+    {"charmap", "draw_ascii", 0x4965dc,
+     "0F B7 04 55 ?? ?? ?? ??"},
+    {"ascii_blit", "draw_ascii", 0x49670f,
+     "8B 3D ?? ?? ?? ?? 50 8B 45 E0 D8 C1 D9 1D ?? ?? ?? ?? DB 45 E4 89 4D E4 8B 4D D4 51 D8 F2 50 52 6A 00 6A 00 6A 01 D8 C1 D9 1D ?? ?? ?? ?? DB 45 E4 DE F2 DE C1 D9 1D ?? ?? ?? ?? E8 ?? ?? ?? ??"},
+    {"bind_tex", NULL, 0x49cebd,
+     "8B 07 53 68 01 14 00 00 A3 ?? ?? ?? ?? 8A 45 14 68 08 19 00 00"},
+    {"named_str", NULL, 0x47bce5,
+     "0F BF D0 69 D2 CC 15 00 00 56 81 C2 ?? ?? ?? ?? 52 8D 85 F8 FE FF FF 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ??"},
+    {"tok_class", NULL, 0x46ed0e,
+     "3C 20 74 34 3C 0D 74 30 3C 09 74 2C 3C 30 7C 0B 3C 39 7F 07 B8 02 00 00 00 EB 26 3C 61 7C 04 3C 7A 7E 19"},
+};
+enum { P_DRAW_TEXT, P_FONT_SELECT, P_DRAW_ASCII, P_CHARMAP, P_ASCII_BLIT, P_BIND_TEX, P_NAMED_STR, P_TOK_CLASS, P_COUNT };
+
+static BYTE *g_textStart, *g_textEnd;
+
+static int parse_pattern(const char *s, BYTE *bytes, BYTE *mask)
+{
+    int n = 0;
+    while (*s)
+    {
+        if (*s == ' ')
+        {
+            s++;
+            continue;
+        }
+        if (s[0] == '?')
+            bytes[n] = 0, mask[n] = 0;
+        else
+            bytes[n] = (BYTE)strtoul(s, NULL, 16), mask[n] = 1;
+        n++;
+        s += 2;
+    }
+    return n;
+}
+
+static int match_at(const BYTE *p, const BYTE *bytes, const BYTE *mask, int n)
+{
+    int i;
+    if (p < g_textStart || p + n > g_textEnd)
+        return 0;
+    for (i = 0; i < n; i++)
+        if (mask[i] && p[i] != bytes[i])
+            return 0;
+    return 1;
+}
+
+// Returns the match, or NULL (not found, or not unique).
+static BYTE *find_pattern(int idx, BYTE **found, int forceScan, int *viaScan)
+{
+    const Pattern *pt = &kPatterns[idx];
+    BYTE bytes[256], mask[256], *p, *from, *to, *hit = NULL;
+    int n = parse_pattern(pt->pat, bytes, mask), hits = 0, a;
+    *viaScan = 0;
+    if (!forceScan && match_at((BYTE *)VA(pt->steamVa), bytes, mask, n))
+        return (BYTE *)VA(pt->steamVa); // the Steam build: the known place
+    *viaScan = 1;
+    from = g_textStart;
+    to = g_textEnd - n;
+    if (pt->anchor)
+    {
+        for (a = 0; a < P_COUNT && strcmp(kPatterns[a].name, pt->anchor) != 0; a++)
+            ;
+        if (a == P_COUNT || !found[a])
+            return NULL;
+        from = found[a];
+        if (from + 0x400 < to)
+            to = from + 0x400;
+    }
+    for (p = from; p <= to; p++)
+        if ((!mask[0] || p[0] == bytes[0]) && match_at(p, bytes, mask, n))
+        {
+            if (pt->anchor)
+                return p; // the first one after the anchor
+            hits++;
+            hit = p;
+        }
+    if (hits != 1)
+    {
+        jp_log("pattern %s: %d matches\n", pt->name, hits);
+        return NULL;
+    }
+    return hit;
+}
+
+static DWORD unreloc(DWORD runtime) { return runtime - (DWORD)g_base + 0x400000; }
+static DWORD abs_at(const BYTE *p) { return unreloc(*(const DWORD *)p); }
+static DWORD call_at(const BYTE *p) { return unreloc((DWORD)(p + 4) + *(const DWORD *)p); } // rel32 at p
+
+// Fills g_va. Returns 1 when everything needed for Japanese text was found.
+static int resolve_addresses(int forceScan)
+{
+    IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)g_base;
+    IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(g_base + dos->e_lfanew);
+    IMAGE_SECTION_HEADER *sec = IMAGE_FIRST_SECTION(nt);
+    BYTE *m[P_COUNT] = {0};
+    int i, scanned = 0, viaScan, core;
+    for (i = 0; i < nt->FileHeader.NumberOfSections; i++)
+        if (sec[i].Characteristics & IMAGE_SCN_CNT_CODE)
+        {
+            g_textStart = g_base + sec[i].VirtualAddress;
+            g_textEnd = g_textStart + sec[i].Misc.VirtualSize;
+            break;
+        }
+    if (!g_textStart)
+        return 0;
+    for (i = 0; i < P_COUNT; i++)
+    {
+        m[i] = find_pattern(i, m, forceScan, &viaScan);
+        if (forceScan == 2 && i == P_TOK_CLASS)
+            m[i] = NULL; // [debug] force_scan=2: pretend one is missing (tests the fall-back to English)
+        scanned += viaScan;
+        if (!m[i])
+            jp_log("not found in this Avernum.exe: %s\n", kPatterns[i].name);
+    }
+    memset(g_va, 0, sizeof g_va);
+    if (m[P_DRAW_TEXT])
+    {
+        g_va[I_DRAW_TEXT] = unreloc((DWORD)m[P_DRAW_TEXT]);
+        g_va[I_RECT_OFF_X] = abs_at(m[P_DRAW_TEXT] + 58);
+        g_va[I_RECT_OFF_Y] = abs_at(m[P_DRAW_TEXT] + 74);
+        g_va[I_ORIGIN_B] = abs_at(m[P_DRAW_TEXT] + 87);
+        g_va[I_ORIGIN_A] = abs_at(m[P_DRAW_TEXT] + 101);
+        g_va[I_OFFSET_RECT] = call_at(m[P_DRAW_TEXT] + 115);
+    }
+    if (m[P_FONT_SELECT])
+    {
+        g_va[I_CUR_FONT] = abs_at(m[P_FONT_SELECT] + 7);
+        g_va[I_FONT0] = abs_at(m[P_FONT_SELECT] + 11);
+        g_va[I_LINE_ACC] = abs_at(m[P_FONT_SELECT] + 24);
+    }
+    if (m[P_DRAW_ASCII])
+    {
+        g_va[I_DRAW_ASCII] = unreloc((DWORD)m[P_DRAW_ASCII]);
+        g_va[I_PEN_X] = abs_at(m[P_DRAW_ASCII] + 9);
+        g_va[I_PEN_Y] = abs_at(m[P_DRAW_ASCII] + 16);
+        // the same current-font pointer and first font must be used here
+        if (abs_at(m[P_DRAW_ASCII] + 25) != g_va[I_CUR_FONT] || abs_at(m[P_DRAW_ASCII] + 42) != g_va[I_FONT0])
+        {
+            jp_log("draw_ascii does not match font_select\n");
+            g_va[I_DRAW_ASCII] = 0;
+        }
+    }
+    if (m[P_CHARMAP])
+        g_va[I_CHARMAP] = abs_at(m[P_CHARMAP] + 4);
+    if (m[P_ASCII_BLIT])
+    {
+        g_va[I_FONT_TEX] = abs_at(m[P_ASCII_BLIT] + 2);
+        g_va[I_COLOR_R] = abs_at(m[P_ASCII_BLIT] + 14);
+        g_va[I_COLOR_G] = abs_at(m[P_ASCII_BLIT] + 42);
+        g_va[I_COLOR_B] = abs_at(m[P_ASCII_BLIT] + 55);
+        g_va[I_BLIT] = call_at(m[P_ASCII_BLIT] + 60);
+    }
+    if (m[P_BIND_TEX])
+        g_va[I_BOUND_TEX_CACHE] = abs_at(m[P_BIND_TEX] + 9);
+    if (m[P_NAMED_STR])
+    {
+        g_va[I_NAMED_PUSH] = unreloc((DWORD)(m[P_NAMED_STR] + 23));
+        g_va[I_FMT_S_SPACE_S] = abs_at(m[P_NAMED_STR] + 24);
+        g_va[I_NAMED_CALL] = unreloc((DWORD)(m[P_NAMED_STR] + 29));
+        g_va[I_SPRINTF] = call_at(m[P_NAMED_STR] + 30);
+    }
+    if (m[P_TOK_CLASS])
+    {
+        BYTE *p = m[P_TOK_CLASS];
+        g_va[I_TOKCLASS] = unreloc((DWORD)(p + 12));
+        g_va[I_TOK_DIGIT] = unreloc((DWORD)(p + 20));
+        g_va[I_TOK_OTHER] = unreloc((DWORD)(p + 27));
+        g_va[I_TOK_LETTER] = unreloc((DWORD)(p + 35 + (signed char)p[34]));
+    }
+
+    {
+        int same = 1;
+        for (i = 0; i < I_COUNT; i++)
+            if (g_va[i] != kSteamVa[i])
+            {
+                same = 0;
+                jp_log("  %-16s %06x (Steam build: %06x)\n", kAddrName[i], g_va[i], kSteamVa[i]);
+            }
+        jp_log("hook points: %s%s\n", same ? "same as the Steam build" : "differ from the Steam build (see above)",
+               scanned ? (forceScan ? " [search forced by force_scan]" : " [searched]") : "");
+    }
+    // Japanese text needs the renderer and the script loader fix; without them the
+    // game is left completely untouched (English).
+    core = 1;
+    for (i = 0; i < I_COUNT; i++)
+        if (!g_va[i] && i != I_SPRINTF && i != I_NAMED_PUSH && i != I_NAMED_CALL && i != I_FMT_S_SPACE_S)
+            core = 0;
+    return core;
+}
+
 BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
 {
     if (reason == DLL_PROCESS_ATTACH)
@@ -1588,6 +1948,13 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
         load_config(dir);
         g_base = (BYTE *)GetModuleHandleA(NULL);
         jp_log("Avernum JP hook loaded. base=%p face=%s\n", g_base, g_fontFace);
+        _snprintf(path, sizeof path, "%s\\avernum_jp.ini", dir);
+        g_forceScan = GetPrivateProfileIntA("debug", "force_scan", 0, path);
+        if (!resolve_addresses(g_forceScan))
+        {
+            jp_log("this Avernum.exe is not supported: Japanese is turned off and the game runs unchanged\n");
+            return TRUE;
+        }
         install();
         _snprintf(path, sizeof path, "%s\\avernum_jp_exe.tsv", data);
         load_exe_strings(GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES ? data : dir);

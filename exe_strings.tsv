@@ -12,7 +12,7 @@ va	sink	refs	english	japanese
 0x5cbf90	message	1	abil_place_in_mouseover called prematurely.	
 0x5cbfc0		1	Melee Attack	近接攻撃
 0x5cbfd0	label	1	Close Attack	近接攻撃
-0x5cbfe0	short	?	Missile	飛び道具
+0x5cbfe0	short	1	Missile	飛び道具
 0x5cbfe8	label	1	Magical Missile	魔法の飛び道具
 0x5cbff8	label	1	Affects Single Ally	味方単体
 0x5cc00c	label	1	Affects Nearby Allies	近くの味方
@@ -20,7 +20,7 @@ va	sink	refs	english	japanese
 0x5cc038	label	1	Affects Everyone Nearby	近くの全員
 0x5cc050	sprintf	1	Energy Cost: %d. 	呪文力消費: %d。 
 0x5cc064	sprintf	1	Turns to recover: %d. 	回復までのターン: %dターン。 
-0x5cc084	short	?	 (%d%%)	（%d%%）
+0x5cc084	short	1	 (%d%%)	（%d%%）
 0x5cc098	label	3	Cone Attack	扇状攻撃
 0x5cc0a4	label	3	Affects an area.	範囲に効果。
 0x5cc0b8		1	%s base %s damage.%s	%1$s 基本%2$sダメージ。%3$s
@@ -53,7 +53,7 @@ va	sink	refs	english	japanese
 0x5cc388	sprintf	1	Pet gets %s for %s Turns.%s	ペットに%1$s（%2$sターン）。%3$s
 0x5cc3a4	label	1	Dispel nearby magical barriers.	近くの魔法の障壁を解除。
 0x5cc3c4	float	1	Parry!	受け流し！
-0x5cc3cc	short	?	Missed	外れ
+0x5cc3cc	short	1	Missed	外れ
 0x5cc3d4	float	1	Spines!	トゲ！
 0x5cc3dc	float	1	Riposte!	反撃！
 0x5cc3e8	sprintf	1	 ripostes the attack.	は攻撃に反撃した。
@@ -67,7 +67,7 @@ va	sink	refs	english	japanese
 0x5cc518	sprintf	1	 is wounded by spines.	はトゲで傷ついた。
 0x5cc530	sprintf	1	 drips poison into the wound.	は傷口に毒が滴り込んだ。
 0x5cc550	sprintf	1	 drips searing venom into the wound.	は傷口に焼けつく毒が滴り込んだ。
-0x5cc578	short	?	 with terror.	を恐怖で圧倒した。
+0x5cc578	short	1	 with terror.	を恐怖で圧倒した。
 0x5cc588	sprintf	1	 overwhelms 	は
 0x5cc59c	sprintf	1	 clouds the mind of 	の精神攪乱→
 0x5cc5b4	sprintf	1	 silly.	をふらふらにさせた。
@@ -75,8 +75,8 @@ va	sink	refs	english	japanese
 0x5cc5c8	sprintf	1	 makes time slow down for 	の時間減速→
 0x5cc5e4	sprintf	1	 with lightning.	に雷を浴びせた。
 0x5cc5f8	sprintf	1	 covers 	は
-0x5cc604	fragment	?	%)	%）
-0x5cc608	fragment	?	. (	（
+0x5cc604	fragment	1	%)	%）
+0x5cc608	fragment	3	. (	（
 0x5cc60c	concat3	1	 attacks 	の攻撃→
 0x5cc618	float	1	Backstab!	背後攻撃！
 0x5cc624	float	4	Critical!	クリティカル！
@@ -116,7 +116,7 @@ va	sink	refs	english	japanese
 0x5ccb00	message	2	(A Battle Discipline wasn't used. Fatigue removed.)	（戦闘修練が使われなかったため、疲労が取り除かれた。）
 0x5ccb34	message	1	Combat: Some characters still have APs.	戦闘: 行動ポイントが残っているキャラクターがいる。
 0x5ccb5c	message	1	Starting new round.	新しいラウンドを開始する。
-0x5ccb70	short	?	Active	行動中
+0x5ccb70	short	1	Active	行動中
 0x5ccb78	message	1	Start Action: Not until actions of other characters are finished.	行動開始: 他のキャラクターの行動が終わるまでは行動できない。
 0x5ccc4c	sprintf	1	You gain an item: 	アイテムを得た: 
 0x5ccc60	sprintf	1	You lose an item: 	アイテムを失った: 
@@ -222,7 +222,7 @@ va	sink	refs	english	japanese
 0x5ce700		1	Sell All In Bag	袋の中身をすべて売却
 0x5ce710		1	Open Junk Bag	ガラクタ袋を開く
 0x5ce720	label	1	Close Junk Bag	ガラクタ袋を閉じる
-0x5ce734	short	?	Steal	盗む
+0x5ce734	short	1	Steal	盗む
 0x5ce73c	draw	1	Quick Use Items:	クイック使用アイテム：
 0x5ce750	draw	1	Your Pack:	持ち物：
 0x5ce75c	sprintf	1	Coins: %d   Carrying %d lbs.  Encumbered at %d lbs.	所持金: %dゴールド　携行重量: %d lbs.　荷重上限: %d lbs.
@@ -282,10 +282,10 @@ va	sink	refs	english	japanese
 0x5cf2d0	draw	1	The Avernum Character Editor places unlimited power at your disposal. Alas, you have to have a registered copy of Avernum to be able to use it.	アヴァーナムのキャラクターエディターは、無限の力を自由に扱えるようにします。残念ながら、使用するにはアヴァーナムの正規版が必要です。
 0x5cf360	draw	1	To learn how to register Avernum, relaunch the game. A window will be displayed explaining what to do.	アヴァーナムの登録方法を知るには、ゲームを起動し直してください。やるべきことを説明する画面が表示されます。
 0x5cf3c8	button	1	Select Difficulty	難易度の選択
-0x5cf3dc	short	?	Casual	カジュアル
-0x5cf3e4	short	?	Normal	ノーマル
-0x5cf3ec	short	?	Hard	ハード
-0x5cf3f4	short	?	Torment	トーメント
+0x5cf3dc	short	2	Casual	カジュアル
+0x5cf3e4	short	2	Normal	ノーマル
+0x5cf3ec	short	2	Hard	ハード
+0x5cf3f4	short	2	Torment	トーメント
 0x5cf400	draw	1	You can also change the difficulty later on the Game Settings window.	難易度は、あとからゲーム設定画面で変更することもできます。
 0x5cf448	button	1	Avernum Help	アヴァーナムヘルプ
 0x5cf458	sprintf	1	Using Blessings  	祝福の使い方  
@@ -356,15 +356,15 @@ va	sink	refs	english	japanese
 0x5d04a4	sprintf	1	Current experience: %u	現在の経験値：%u
 0x5d04bc	sprintf	1	Next level at: %u	次のレベル到達値：%u
 0x5d04dc	sprintf	2	Points to spend: %d	使用可能なポイント：%d
-0x5d04f8	short	?	Health	体力
+0x5d04f8	short	1	Health	体力
 0x5d0500	label	1	When you take damage, your health goes down. When you run out of health, your character goes unconscious. To heal/revive characters, return to a friendly town. Increase your Endurance when you gain a level to get more health.	ダメージを受けると、体力が減ります。体力がなくなると、キャラクターは意識を失います。キャラクターを回復・復活させるには、友好的な町に戻ってください。レベルが上がったときに持久力を上げると、体力も増えます。
 0x5d05e4	label	1	Spell Energy	呪文力
 0x5d05f8	label	1	When you cast spells, your Spell Energy is reduced. When you run out, you can't cast spells. To regain energy, return to a friendly town or use a Potion of Energy.	呪文を唱えると、呪文力が減ります。呪文力がなくなると、呪文を唱えられなくなります。呪文力を回復するには、友好的な町に戻るか、エナジーの薬を使ってください。
 0x5d06a4	sprintf	1	Reputation: %s (%d)	評判：%s（%d）
 0x5d06b8	draw	1	See Spells/Abilities	呪文・能力
 0x5d06d0	draw	1	Change Party Order:	パーティーの並び順：
-0x5d06e4	short	?	Up	上へ
-0x5d06e8	short	?	Down	下へ
+0x5d06e4	short	1	Up	上へ
+0x5d06e8	short	1	Down	下へ
 0x5d06fc	sprintf	2	Maximum increases: 	上昇の上限： 
 0x5d0710	sprintf	1	Traits available: %d	利用可能な特性：%d
 0x5d0728	draw	1	See Statistics	統計を見る
@@ -373,18 +373,18 @@ va	sink	refs	english	japanese
 0x5d07f8	0x4d2870,sprintf	2	Recorded:	記録：
 0x5d0804	sprintf	3	Recorded in %s:	%sの記録：
 0x5d081c	sprintf	1	Record   You have %d coins.	記録   所持金：%dゴールド
-0x5d08a4	short	?	Record	記録
+0x5d08a4	short	1	Record	記録
 0x5d08ac	sprintf	2	No jobs currently available.	現在、受けられる依頼はありません。
 0x5d08d0	sprintf	2	Select the destination you want to teleport to. You can teleport to any pylon you have used. Select the OK button to just stay here.	転送先を選んでください。これまでに使用した転送柱のどれにでも転送できます。ここに留まる場合は、「OK」ボタンを選んでください。
 0x5d099c		1	The Portal	転移門
 0x5d09a8		1	Job Board	依頼掲示板
 0x5d09b4		1	Avernum Instructions	アヴァーナムの手引き
 0x5d09cc	button	1	Your Records	記録
-0x5d09dc	short	?	Journal	日誌
+0x5d09dc	short	1	Journal	日誌
 0x5d09e4	button	1	Special Items	特殊アイテム
 0x5d09f4	button	1	Current Quests	進行中のクエスト
 0x5d0a04	draw	1	[Empty]	（空き）
-0x5d0a0c	short	?	Delete	削除
+0x5d0a0c	short	1	Delete	削除
 0x5d0a6c		1	You've already bought two levels of this skill from trainers.	この技能は、トレーナーから既に2レベル分購入しています。
 0x5d0ab0		1	Your Mage Spells skill isn't high enough to learn this spell. Select another character.	魔術の技能が足りないため、この呪文は覚えられません。別のキャラクターを選んでください。
 0x5d0b08		1	Your Priest Spells skill isn't high enough to learn this spell. Select another character.	祈祷の技能が足りないため、この呪文は覚えられません。別のキャラクターを選んでください。
@@ -417,11 +417,11 @@ va	sink	refs	english	japanese
 0x5d0ee4	sprintf	1	Animated (Slower)	アニメーションあり（遅い）
 0x5d0ef8	sprintf	1	Snap Movement (Faster)	アニメーションなし（速い）
 0x5d0f10	sprintf	1	Scrolling Speed:	スクロール速度：
-0x5d0f24	short	?	Fast	速い
-0x5d0f2c	short	?	Slow	遅い
-0x5d0f34	short	?	Warning Before Pause In Combat:	戦闘の一時停止前に警告：
-0x5d0f54	short	?	On	オン
-0x5d0f58	short	?	Off	オフ
+0x5d0f24	short	1	Fast	速い
+0x5d0f2c	short	1	Slow	遅い
+0x5d0f34	short	1	Warning Before Pause In Combat:	戦闘の一時停止前に警告：
+0x5d0f54	short	2	On	オン
+0x5d0f58	short	3	Off	オフ
 0x5d0f5c	sprintf	1	Arrow Keys:	矢印キー：
 0x5d0f68	sprintf	1	Move Party	パーティーを移動
 0x5d0f74	sprintf	1	Scroll Terrain View	地形表示をスクロール
@@ -436,14 +436,14 @@ va	sink	refs	english	japanese
 0x5d1064	sprintf	1	Draw All	すべて描画
 0x5d1070	sprintf	1	Don't Draw	描画しない
 0x5d107c	sprintf	1	Game Area Size:	ゲーム画面のサイズ：
-0x5d108c	short	?	Small	小
+0x5d108c	short	1	Small	小
 0x5d1094	sprintf	1	Whole Window	ウィンドウ全体
 0x5d10a4	sprintf	1	Game Text Size:	ゲーム文字のサイズ：
-0x5d10b4	short	?	Default	標準
-0x5d10bc	short	?	Larger	大きめ
+0x5d10b4	short	1	Default	標準
+0x5d10bc	short	1	Larger	大きめ
 0x5d10c4	sprintf	1	Sound Settings	サウンド設定
 0x5d10d4	sprintf	1	Sound Volume:	音量：
-0x5d10e4	short	?	Quiet	静か
+0x5d10e4	short	1	Quiet	静か
 0x5d10ec	sprintf	1	Background Sounds:	環境音：
 0x5d1100	sprintf	1	No Shortcut	ショートカットなし
 0x5d1114	sprintf	1	%s - Type Shortcut	%s - ショートカットを入力
@@ -488,7 +488,7 @@ va	sink	refs	english	japanese
 0x5d28e8	message	2	Floating text too long.	
 0x5d2940	0x47d190	1	You suspect that there is something hidden here, but you don't have enough Cave Lore to discover it.	ここに何か隠されている気がするが、発見するには洞窟学が足りない。
 0x5d29a8	sprintf	1	You detect and dig up a hidden cache. You find: %s.	隠された貯蔵品を見つけて掘り出した。発見したもの: %s。
-0x5d29e0	short	?	Sell	売却
+0x5d29e0	short	1	Sell	売却
 0x5d29e8	sprintf	2	Shortcut: 	ショートカット: 
 0x5d29f4	label	1	(You can pay a trainer to improve this skill up to two times.)	（トレーナーに料金を支払うと、この技能を2回まで上げられます。）
 0x5d2a34	label	1	Currently Using:	現在使用中：
@@ -534,7 +534,7 @@ va	sink	refs	english	japanese
 0x5d2e3c	concat3,sprintf	2	 increases 	の能力上昇: 
 0x5d2e48	concat3	1	 decreases 	の能力低下: 
 0x5d2e54	float	1	XP +	経験値 +
-0x5d2e5c	fragment	?	!	！
+0x5d2e5c	fragment	4	!	！
 0x5d2e60	concat3	1	 is now level 	はレベル
 0x5d2e70	float	1	Level up!	レベルアップ！
 0x5d2e7c	float	1	+1 Endurance	+1 持久力
@@ -568,7 +568,7 @@ va	sink	refs	english	japanese
 0x5d3274	concat3	1	 energy.	回復した。
 0x5d3280	concat3	1	 gains 	の呪文力が
 0x5d3288	float	1	Energy +	呪文力 +
-0x5d3294	short	?	Cured	治癒
+0x5d3294	short	1	Cured	治癒
 0x5d329c	sprintf	1	 is cured.	は治った。
 0x5d32d0	message	1	A powerful foe resists a mind control effect, but the effort makes it ill.	強力な敵は精神支配の効果に抵抗したが、その負担で体調を崩した。
 0x5d331c	sprintf	1	 immune to 	は免疫：
@@ -641,7 +641,7 @@ va	sink	refs	english	japanese
 0x5d3e5c	message	1	You can't use this ability on an unconscious character.	意識を失っているキャラクターには、この能力を使えない。
 0x5d3e94	tooltip	1	Save/Load/Quit Menu (Escape)	セーブ/ロード/終了メニュー（Escape）
 0x5d3eb8	tooltip	1	Instructions (	操作説明（
-0x5d3ec8	short	?	Instructions	操作説明
+0x5d3ec8	short	1	Instructions	操作説明
 0x5d3ed8	tooltip	1	Map of Avernum (	アヴァーナムの地図（
 0x5d3eec	tooltip	1	Map of Avernum	アヴァーナムの地図
 0x5d3efc	sprintf	1	Edit Party (	パーティー編集（
@@ -656,7 +656,7 @@ va	sink	refs	english	japanese
 0x5d3fa4	tooltip	1	Battle Discipline (	戦闘修練（
 0x5d3fb8	tooltip	1	Battle Discipline	戦闘修練
 0x5d3fcc	tooltip	1	Inventory (	持ち物（
-0x5d3fd8	short	?	Inventory	持ち物
+0x5d3fd8	short	1	Inventory	持ち物
 0x5d3fe4	tooltip	1	See Journal/Quest Log (	日誌/クエストログを表示（
 0x5d3ffc	tooltip	1	See Journal/Quest Log	日誌/クエストログを表示
 0x5d4014		1	Empty Quick Spell slot.	クイック呪文の欄は空だ。
@@ -734,7 +734,7 @@ va	sink	refs	english	japanese
 0x5d4dac	message	2	  (Press space bar to end your turn early.)	  （スペースキーを押すと、ターンを早めに終了できる。）
 0x5d4dd8	message	1	You have to get out of the boat first.	まずボートから降りる必要がある。
 0x5d4e00	message	1	Are you sure you want to end this character's turn? (Select again to end turn.)	このキャラクターのターンを終了しますか？（もう一度選択すると、ターンを終了する。）
-0x5d4e50	short	?	  (You can turn off this warning in Game Options.)	  （この警告は、ゲームオプションで無効にできる。）
+0x5d4e50	short	1	  (You can turn off this warning in Game Options.)	  （この警告は、ゲームオプションで無効にできる。）
 0x5d4e84	message	1	Talk: You can't talk to charmed characters.	会話: 魅了されたキャラクターとは話せない。
 0x5d4eb0	message	1	Talk: Can't talk in combat mode. (To attack, press attack button	会話: 戦闘モード中は話せない。（攻撃するには、攻撃ボタンを押し、
 0x5d4ef4	message	1	  and then select character again.)	  そのあとでキャラクターを選び直すこと。）
@@ -786,7 +786,7 @@ va	sink	refs	english	japanese
 0x5d7524	message	1	The guards here know about you. They step aside.	ここの衛兵はあなたたちのことを知っている。道を空けた。
 0x5d7558	town	1	This old man finds a wide variety of unusual items, which he then sells to adventurers like you.	この老人は、珍しい品々を幅広く見つけ出し、あなたたちのような冒険者に売っている。
 0x5d75bc	town	1	Hermit Merchant	隠者の商人
-0x5d75d0	short	?	Many merchants travel through this steamy cavern, on the way from the Great Cave to the Eastern Gallery. They're glad to spend a few minutes haggling with you.	蒸し暑いこの洞窟を、多くの商人が大洞窟から東の回廊へ向かう途中で通っていく。彼らは、あなたたちと数分の値段交渉を喜んで行う。
+0x5d75d0	short	1	Many merchants travel through this steamy cavern, on the way from the Great Cave to the Eastern Gallery. They're glad to spend a few minutes haggling with you.	蒸し暑いこの洞窟を、多くの商人が大洞窟から東の回廊へ向かう途中で通っていく。彼らは、あなたたちと数分の値段交渉を喜んで行う。
 0x5d7670	town	1	Merchants Caravan	商隊
 0x5d7688	town	1	These soldiers are highly skilled and experienced slith fighters, and they have the loot to show for it. They'll gladly sell some of it to you, for a price.	この兵士たちは熟練したスリスの戦士で、その戦利品の数々がそれを物語っている。値段次第で、いくらかを喜んで売ってくれる。
 0x5d7728	town	1	Guard Loot	衛兵の戦利品
@@ -813,10 +813,10 @@ va	sink	refs	english	japanese
 0x5d7ea8	sprintf	1	Unregistered Copy.|v1.0.1S, Copyright 2011-2, Spiderweb Software, All Rights Reserved	未登録版。|v1.0.1S, Copyright 2011-2, Spiderweb Software, All Rights Reserved
 0x5d7f00	sprintf	1	v1.0.1S, Copyright 2011-2, Spiderweb Software, All Rights Reserved	
 0x5d7f48	sprintf	1	v1.0.1S DEMO, Copyright 2011-2, Spiderweb Software, All Rights Reserved	
-0x5d7fc4	short	?	West	西
-0x5d7fcc	short	?	North	北
-0x5d7fd4	short	?	East	東
-0x5d7fdc	short	?	South	南
+0x5d7fc4	short	1	West	西
+0x5d7fcc	short	1	North	北
+0x5d7fd4	short	1	East	東
+0x5d7fdc	short	1	South	南
 0x5d7fe8	tutorial	1	You should get weapons for anyone else in your party. Click on the portraits to the upper left to switch to other characters. Have everyone equip a blade.	パーティーの他のメンバーにも武器を持たせましょう。左上の肖像画をクリックすると、ほかのキャラクターに切り替えられます。全員に刃物を装備させましょう。
 0x5d8088	help	3	This window is where you can pick up (and drop) items, equip (or remove) them, or use them.	このウィンドウでは、アイテムを拾ったり（捨てたり）、装備したり（外したり）、使ったりできます。
 0x5d80e8	tutorial	1	Click on an item (or type the letter by it) on the ground to move it to your pack. Click on it again to pick it up.	地面のアイテムをクリックする（またはそのそばのアルファベットを入力する）と、持ち物に移動します。もう一度クリックすると、それを拾い上げます。

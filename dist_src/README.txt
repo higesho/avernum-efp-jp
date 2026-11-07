@@ -8,8 +8,10 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
 
 
 ■ 対応しているゲーム
-  Steam 版 Avernum: Escape From the Pit（アプリ番号 208400）
-  GOG 版や Humble 版などには対応していません。
+  Steam 版 Avernum: Escape From the Pit（アプリ番号 208400）で動作を確認しています。
+  GOG 版・Humble 版など他のストアの版でも動くように作ってありますが、動作は未確認です。
+  対応できない版では日本語化を自動で止め、英語のまま普通に起動します。
+  他のストアの版で試した方は、動いたかどうかを avernum_jp\avernum_jp.log を添えて GitHub の Issues でお知らせください。
 
 
 ■ インストール
@@ -36,7 +38,8 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
   ・英語のままの場合: avernum_jp\avernum_jp.log を開き、「not translated」と出ていないか確認してください。
     ゲームのファイルが元と違う（更新された、別のMODで変更されている）と、そのファイルは英語のままになります。
     Steam の「ゲームファイルの整合性を確認」を実行すると直ることがあります。
-  ・ゲームの更新で Avernum.exe が変わると、日本語表示が動かなくなることがあります。
+  ・英語のまま起動する場合は、avernum_jp\avernum_jp.log に「not supported」と出ていないか確認してください。
+    お使いの Avernum.exe に対応できなかったことを示します（ゲームの更新や、他のストアの版など）。
 
 
 ■ 注意
