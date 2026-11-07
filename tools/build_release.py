@@ -1,11 +1,14 @@
-"""Assemble the release ZIP.
+"""Assemble the release ZIP (drop-in layout: copy the contents into the game folder).
 
 usage:
     python -I build_release.py ORIGINAL_ROOT GAME_ROOT OUT_DIR VERSION PAGE_URL
 
 ORIGINAL_ROOT: a game-folder-shaped copy of the untouched files ("Avernum Files/...").
-GAME_ROOT:     the game folder with the Japanese files built in (and dsound.dll etc.).
-Writes OUT_DIR/AvernumEFP_JP_<VERSION>.zip.
+GAME_ROOT:     a game-folder-shaped tree with the Japanese files built in.
+The DLL, ini and exe-string table are taken from this mod folder.
+Writes OUT_DIR/AvernumEFP_JP_<VERSION>.zip with
+    dsound.dll, avernum_jp.ini, avernum_jp/jp_patch.bin, avernum_jp/avernum_jp_exe.tsv,
+    avernum_jp/README.txt
 """
 import os
 import shutil
@@ -26,32 +29,24 @@ def main(argv):
     name = 'AvernumEFP_JP_' + version
     stage = os.path.join(out, name)
     shutil.rmtree(stage, ignore_errors=True)
-    os.makedirs(os.path.join(stage, 'tools'))
-    os.makedirs(os.path.join(stage, 'data'))
+    data = os.path.join(stage, 'avernum_jp')
+    os.makedirs(data)
     subprocess.check_call([sys.executable, '-I', os.path.join(HERE, 'make_patch.py'), orig, game,
-                           os.path.join(stage, 'data', 'jp_patch.bin')])
-    for f in ('dsound.dll', 'avernum_jp_exe.tsv', 'avernum_jp.ini'):
-        shutil.copy2(os.path.join(game, f), os.path.join(stage, 'data', f))
-
-    def text(src, dst, crlf=True, bom=True):
-        t = open(src, encoding='utf-8').read().replace('__VERSION__', version).replace('__PAGE_URL__', page)
-        if crlf:
-            t = t.replace('\r\n', '\n').replace('\n', '\r\n')
-        with open(dst, 'w', encoding='utf-8-sig' if bom else 'utf-8', newline='') as fh:
-            fh.write(t)
-
-    # Windows PowerShell 5.1 reads a .ps1 without BOM as the ANSI code page, so the BOM is required
-    text(os.path.join(SRC, 'tools', 'installer.ps1'), os.path.join(stage, 'tools', 'installer.ps1'))
-    text(os.path.join(SRC, 'README.txt'), os.path.join(stage, 'README.txt'))
-    for f in ('install.bat', 'uninstall.bat'):
-        shutil.copy2(os.path.join(SRC, f), os.path.join(stage, f))
+                           os.path.join(data, 'jp_patch.bin')])
+    shutil.copy2(os.path.join(MOD, 'dsound.dll'), os.path.join(stage, 'dsound.dll'))
+    shutil.copy2(os.path.join(SRC, 'avernum_jp.ini'), os.path.join(stage, 'avernum_jp.ini'))
+    shutil.copy2(os.path.join(MOD, 'exe_strings.tsv'), os.path.join(data, 'avernum_jp_exe.tsv'))
+    t = open(os.path.join(SRC, 'README.txt'), encoding='utf-8').read()
+    t = t.replace('__VERSION__', version).replace('__PAGE_URL__', page).replace('\r\n', '\n').replace('\n', '\r\n')
+    with open(os.path.join(data, 'README.txt'), 'w', encoding='utf-8-sig', newline='') as fh:
+        fh.write(t)
 
     zpath = os.path.join(out, name + '.zip')
     with zipfile.ZipFile(zpath, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for dirpath, _, files in os.walk(stage):
             for fn in sorted(files):
                 p = os.path.join(dirpath, fn)
-                z.write(p, os.path.relpath(p, out).replace('\\', '/'))
+                z.write(p, os.path.relpath(p, stage).replace('\\', '/'))   # contents at the ZIP root
     print('wrote', zpath, os.path.getsize(zpath), 'bytes')
     return 0
 

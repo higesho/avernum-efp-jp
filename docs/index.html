@@ -203,7 +203,7 @@ footer p { margin: 0 0 6px; }
 
 <header class="hero">
   <div class="wrap">
-    <span class="eyebrow">非公式ファン翻訳 · ベータ版 v0.9.0</span>
+    <span class="eyebrow">非公式ファン翻訳 · ベータ版 v0.9.1</span>
     <h1>Avernum: Escape From the Pit<small>日本語化パッチ</small></h1>
     <p class="lead">
       罪人が落とされる地下世界アヴァーナムで、生き延び、そして地上への道を探す——。
@@ -270,23 +270,22 @@ footer p { margin: 0 0 6px; }
     <h2>インストール方法</h2>
     <ol class="steps">
       <li>
-        <h3>ダウンロードして展開</h3>
-        <p><a href="https://github.com/higesho/avernum-efp-jp/releases/latest">リリースページ</a>から <code>AvernumEFP_JP_v0.9.0.zip</code> をダウンロードし、好きな場所に展開します。</p>
+        <h3>ダウンロード</h3>
+        <p><a href="https://github.com/higesho/avernum-efp-jp/releases/latest">リリースページ</a>から <code>AvernumEFP_JP_v0.9.1.zip</code> をダウンロードし、展開します。</p>
       </li>
       <li>
-        <h3>ゲームを終了して <code>install.bat</code> を実行</h3>
-        <p>ゲームのフォルダは Steam の設定から自動で探します。見つからないときは、<code>Avernum.exe</code> のあるフォルダのパスを入力してください
-        （Steam でゲームを右クリック →「管理」→「ローカルファイルを閲覧」で開くフォルダです）。</p>
-        <p class="muted">「Windows によって PC が保護されました」と表示された場合は「詳細情報」→「実行」を押してください。</p>
+        <h3>ゲームのフォルダにコピー</h3>
+        <p>中身の <code>dsound.dll</code>・<code>avernum_jp.ini</code>・<code>avernum_jp</code> フォルダを、ゲームのフォルダ（<code>Avernum.exe</code> のある場所）にそのままコピーします。</p>
+        <p class="muted">ゲームのフォルダは、Steam でゲームを右クリック →「管理」→「ローカルファイルを閲覧」で開けます。</p>
       </li>
       <li>
         <h3>Steam から起動</h3>
-        <p>「インストールしました」と出たら完了です。いつもどおり Steam からゲームを起動してください。</p>
+        <p>いつもどおり Steam からゲームを起動すれば日本語になります。初回の起動時に、お手元のゲームのファイルから日本語版のデータを作ります。</p>
       </li>
     </ol>
     <div class="note">
-      このパッチには元のゲームのファイルは入っていません。お手元のゲームのファイルに差分を当てて日本語版を作ります。
-      書き換える前のファイルは、ゲームフォルダ内の <code>_jp_backup</code> フォルダに保存されます。
+      ゲームの元のファイルは書き換えません。このパッチには元のゲームのファイルは入っておらず、お手元のファイルから日本語版のデータを作って
+      <code>avernum_jp</code> フォルダに保存します。
     </div>
   </section>
 
@@ -295,17 +294,15 @@ footer p { margin: 0 0 6px; }
     <div class="cols">
       <div class="card">
         <h3>元に戻す</h3>
-        <p><code>uninstall.bat</code> を実行すると、保存しておいた元のファイルに戻します。</p>
-        <p class="muted">Steam の「ゲームファイルの整合性を確認」を実行し、ゲームフォルダの <code>dsound.dll</code>・<code>avernum_jp.ini</code>・<code>avernum_jp_exe.tsv</code> を削除しても元に戻せます。</p>
+        <p>ゲームのフォルダから <code>dsound.dll</code>・<code>avernum_jp.ini</code>・<code>avernum_jp</code> フォルダを削除するだけで、英語版に戻ります。</p>
       </div>
       <div class="card">
         <h3>設定</h3>
         <p>ゲームフォルダの <code>avernum_jp.ini</code> で、日本語フォント・太さ・濃さ・大きさ・位置を変更できます。</p>
-        <p class="muted">再インストールしても、すでにある設定ファイルは上書きしません。</p>
       </div>
     </div>
     <div class="note warn" style="margin-top:18px">
-      <b>対応しているのは Steam 版のみです。</b>GOG 版・Humble 版などは実行ファイルが異なるため、インストーラーが確認して中止します。
+      <b>対応しているのは Steam 版のみです。</b>GOG 版・Humble 版などは実行ファイルが異なるため動きません。
       ゲームの更新で <code>Avernum.exe</code> が変わった場合も動かなくなることがあります。
     </div>
     <div class="cols">

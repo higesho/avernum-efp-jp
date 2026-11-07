@@ -11,19 +11,33 @@
   小さいフォント（行の高さ13px）では英字の枠が14pxあり、そのまま描くと上下の行が重なるためです。
 - `DirectSoundCreate` はシステムの dsound.dll にそのまま渡すため、音はそのまま出ます。
 
-## 使い方
+## 使い方（開発）
 1. `build.bat` で `dsound.dll` をビルドする（VS2022 Build Tools, x86）
 2. `dsound.dll` をゲームフォルダ（Avernum.exe と同じ場所）にコピーする
-3. 翻訳ファイルを UTF-8 で書き、`python -I tools/jpconv.py 翻訳フォルダ "../Avernum Files/Scripts"` で EUC-JP に変換してゲームに入れる（文字数の上限も同時に検査する）
+3. 翻訳は `tools/build_scripts.py`、`tools/scen_tool.py build`、`tools/make_images.py`、`tools/make_maps.py` で
+   日本語版のファイルを作る（出力先はゲームフォルダでも、ゲームフォルダと同じ形の作業フォルダでもよい）
 4. **Steamから起動する**（exeを直接起動すると SteamAPI_Init エラーになる。これは元からの仕様）
 
 フォントなどの設定は、ゲームフォルダの `avernum_jp.ini` で変更できます。
-動作ログは `avernum_jp.log` に出力されます。
+動作ログは `avernum_jp/avernum_jp.log`（`avernum_jp` フォルダがなければゲームフォルダ）に出力されます。
+
+## 配布版の構成（コピーするだけの方式）
+ゲームフォルダに `dsound.dll`、`avernum_jp.ini`、`avernum_jp/`（`jp_patch.bin`、`avernum_jp_exe.tsv`）を置きます。
+ゲームの元のファイルは書き換えません。
+
+- 起動時、DLL が `jp_patch.bin` の各ファイルについて元のファイルの SHA-256 を確かめ、差分を当てた日本語版を
+  `avernum_jp/cache/<元と同じ相対パス>` に作る。`cache/stamp.txt` に元のファイルの大きさ・更新日時と
+  `jp_patch.bin` の更新日時を記録し、変わっていなければ次回からはそのまま使う。
+- exe の取り込み表（IAT）の `CreateFileA`、`CreateFileW`、`FindFirstFileExA` を差し替え、読み取りで開かれる
+  対象ファイルを `cache` の日本語版に振り替える。
+- ゲームフォルダのファイルがすでに日本語版と同じとき（開発中に直接書き込んだ場合など）や、元と違うときは振り替えない。
+  開発中にゲームフォルダへ直接書き込んだファイルは、そのまま読まれる。
+- `jp_patch.bin` は `tools/make_patch.py`（`tools/build_release.py` から呼ばれる）が作る。
 
 ## 元に戻す
-- ゲームフォルダの `dsound.dll`、`avernum_jp.ini`、`avernum_jp_exe.tsv` を削除する
-- `_backup_original/Scripts/*.txt` を `Avernum Files/Scripts/` に、`_backup_original/AScenData.dat` を `Avernum Files/` に、`_backup_original/Avernum Graphics Core/*` を `Avernum Files/Avernum Graphics Core/` に上書きコピーする
-  （もしくは Steam の「ゲームファイルの整合性を確認」を実行する）
+- ゲームフォルダの `dsound.dll`、`avernum_jp.ini`、`avernum_jp/` を削除する
+- 開発中にゲームのファイルを直接書き換えた場合は、`_backup_original/` の中身を `Avernum Files/` に戻すか、
+  Steam の「ゲームファイルの整合性を確認」を実行する
 
 ## 調べてわかったこと（主なアドレス、ASLR の影響を除いたVA）
 | VA | 内容 |

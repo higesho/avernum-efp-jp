@@ -1120,23 +1120,478 @@ static void install_msgbox_hook(void)
     hot_patch("MessageBoxW", (void *)my_MessageBoxW, &g_msgBoxBodyW);
 }
 
+// ---------------------------------------------------------------- translated data files (drop-in mode)
+// The game's own files are never changed. avernum_jp\jp_patch.bin holds deltas against the
+// original files; on start-up they are applied into avernum_jp\cache\ (only when the
+// original's SHA-256 matches), and the exe's CreateFileA/W and FindFirstFileExA are
+// redirected there. Removing dsound.dll restores the English game.
+typedef struct
+{
+    DWORD h[8];
+    BYTE buf[64];
+    unsigned __int64 len;
+    int n;
+} Sha256;
+
+static const DWORD kShaK[64] = {
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
+
+#define ROR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
+
+static void sha_block(Sha256 *s, const BYTE *p)
+{
+    DWORD w[64], a, b, c, d, e, f, g, h, t1, t2;
+    int i;
+    for (i = 0; i < 16; i++)
+        w[i] = (DWORD)p[i * 4] << 24 | (DWORD)p[i * 4 + 1] << 16 | (DWORD)p[i * 4 + 2] << 8 | p[i * 4 + 3];
+    for (i = 16; i < 64; i++)
+        w[i] = (ROR(w[i - 2], 17) ^ ROR(w[i - 2], 19) ^ (w[i - 2] >> 10)) + w[i - 7] +
+               (ROR(w[i - 15], 7) ^ ROR(w[i - 15], 18) ^ (w[i - 15] >> 3)) + w[i - 16];
+    a = s->h[0], b = s->h[1], c = s->h[2], d = s->h[3], e = s->h[4], f = s->h[5], g = s->h[6], h = s->h[7];
+    for (i = 0; i < 64; i++)
+    {
+        t1 = h + (ROR(e, 6) ^ ROR(e, 11) ^ ROR(e, 25)) + ((e & f) ^ (~e & g)) + kShaK[i] + w[i];
+        t2 = (ROR(a, 2) ^ ROR(a, 13) ^ ROR(a, 22)) + ((a & b) ^ (a & c) ^ (b & c));
+        h = g, g = f, f = e, e = d + t1, d = c, c = b, b = a, a = t1 + t2;
+    }
+    s->h[0] += a, s->h[1] += b, s->h[2] += c, s->h[3] += d, s->h[4] += e, s->h[5] += f, s->h[6] += g, s->h[7] += h;
+}
+
+static void sha256(const BYTE *data, DWORD size, BYTE out[32])
+{
+    static const DWORD init[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+                                  0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+    Sha256 s;
+    DWORD i;
+    unsigned __int64 bits = (unsigned __int64)size * 8;
+    memcpy(s.h, init, sizeof init);
+    for (i = 0; i + 64 <= size; i += 64)
+        sha_block(&s, data + i);
+    s.n = size - i;
+    memcpy(s.buf, data + i, s.n);
+    s.buf[s.n++] = 0x80;
+    if (s.n > 56)
+    {
+        memset(s.buf + s.n, 0, 64 - s.n);
+        sha_block(&s, s.buf);
+        s.n = 0;
+    }
+    memset(s.buf + s.n, 0, 56 - s.n);
+    for (i = 0; i < 8; i++)
+        s.buf[56 + i] = (BYTE)(bits >> (56 - 8 * i));
+    sha_block(&s, s.buf);
+    for (i = 0; i < 8; i++)
+    {
+        out[i * 4] = (BYTE)(s.h[i] >> 24);
+        out[i * 4 + 1] = (BYTE)(s.h[i] >> 16);
+        out[i * 4 + 2] = (BYTE)(s.h[i] >> 8);
+        out[i * 4 + 3] = (BYTE)s.h[i];
+    }
+}
+
+static BYTE *read_all(const char *path, DWORD *size)
+{
+    FILE *f = fopen(path, "rb");
+    long n;
+    BYTE *buf;
+    if (!f)
+        return NULL;
+    fseek(f, 0, SEEK_END);
+    n = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    buf = (BYTE *)malloc(n > 0 ? n : 1);
+    if (buf && fread(buf, 1, n, f) != (size_t)n)
+    {
+        free(buf);
+        buf = NULL;
+    }
+    fclose(f);
+    *size = (DWORD)n;
+    return buf;
+}
+
+static void make_parent_dirs(const char *path)
+{
+    char tmp[MAX_PATH];
+    char *p;
+    lstrcpynA(tmp, path, MAX_PATH);
+    for (p = tmp + 3; *p; p++)
+        if (*p == '\\')
+        {
+            *p = 0;
+            CreateDirectoryA(tmp, NULL);
+            *p = '\\';
+        }
+}
+
+#define MAX_REDIRECTS 1024
+typedef struct
+{
+    char rel[MAX_PATH];   // lower case, '\' separated, relative to the game folder
+    char cache[MAX_PATH]; // translated copy
+} Redirect;
+static Redirect *g_redir;
+static int g_redirCount;
+static char g_gameDirLower[MAX_PATH];
+static int g_gameDirLen;
+
+static void lower_path(char *s)
+{
+    for (; *s; s++)
+        *s = *s == '/' ? '\\' : (*s >= 'A' && *s <= 'Z') ? *s + 32 : *s;
+}
+
+static const char *redirect_for(const char *path)
+{
+    char full[MAX_PATH * 2];
+    DWORD n;
+    int i;
+    if (!g_redirCount || !path)
+        return NULL;
+    n = GetFullPathNameA(path, sizeof full, full, NULL);
+    if (!n || n >= sizeof full)
+        return NULL;
+    lower_path(full);
+    if (strncmp(full, g_gameDirLower, g_gameDirLen) != 0 || full[g_gameDirLen] != '\\')
+        return NULL;
+    for (i = 0; i < g_redirCount; i++)
+        if (strcmp(full + g_gameDirLen + 1, g_redir[i].rel) == 0)
+            return g_redir[i].cache;
+    return NULL;
+}
+
+typedef HANDLE(WINAPI *CreateFileA_t)(LPCSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
+typedef HANDLE(WINAPI *CreateFileW_t)(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
+typedef HANDLE(WINAPI *FindFirstFileExA_t)(LPCSTR, FINDEX_INFO_LEVELS, LPVOID, FINDEX_SEARCH_OPS, LPVOID, DWORD);
+static CreateFileA_t g_realCreateFileA;
+static CreateFileW_t g_realCreateFileW;
+static FindFirstFileExA_t g_realFindFirstFileExA;
+static int g_redirLogged;
+
+static void log_redirect(const char *from, const char *to)
+{
+    if (g_redirLogged < 5) // the first few, to confirm the redirect works
+    {
+        g_redirLogged++;
+        jp_log("redirect %s -> %s\n", from, to);
+    }
+}
+
+static HANDLE WINAPI my_CreateFileA(LPCSTR name, DWORD access, DWORD share, LPSECURITY_ATTRIBUTES sa,
+                                   DWORD disp, DWORD flags, HANDLE tmpl)
+{
+    const char *to = (access & (GENERIC_WRITE | GENERIC_ALL)) ? NULL : redirect_for(name);
+    if (to)
+    {
+        log_redirect(name, to);
+        name = to;
+    }
+    return g_realCreateFileA(name, access, share, sa, disp, flags, tmpl);
+}
+
+static HANDLE WINAPI my_CreateFileW(LPCWSTR name, DWORD access, DWORD share, LPSECURITY_ATTRIBUTES sa,
+                                   DWORD disp, DWORD flags, HANDLE tmpl)
+{
+    char a[MAX_PATH * 2];
+    WCHAR w[MAX_PATH];
+    const char *to = NULL;
+    if (name && !(access & (GENERIC_WRITE | GENERIC_ALL)) && g_redirCount &&
+        WideCharToMultiByte(CP_ACP, 0, name, -1, a, sizeof a, NULL, NULL))
+        to = redirect_for(a);
+    if (to && MultiByteToWideChar(CP_ACP, 0, to, -1, w, MAX_PATH))
+    {
+        log_redirect(a, to);
+        name = w;
+    }
+    return g_realCreateFileW(name, access, share, sa, disp, flags, tmpl);
+}
+
+static HANDLE WINAPI my_FindFirstFileExA(LPCSTR name, FINDEX_INFO_LEVELS level, LPVOID data,
+                                         FINDEX_SEARCH_OPS op, LPVOID filter, DWORD flags)
+{
+    const char *to = redirect_for(name); // stat() of a translated file reports the translated size
+    return g_realFindFirstFileExA(to ? to : name, level, data, op, filter, flags);
+}
+
+// Replace one entry of the exe's import address table; returns the original function.
+static void *patch_iat(const char *dll, const char *func, void *hook)
+{
+    IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)g_base;
+    IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(g_base + dos->e_lfanew);
+    IMAGE_DATA_DIRECTORY dir = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+    IMAGE_IMPORT_DESCRIPTOR *d = (IMAGE_IMPORT_DESCRIPTOR *)(g_base + dir.VirtualAddress);
+    for (; dir.VirtualAddress && d->Name; d++)
+    {
+        IMAGE_THUNK_DATA *names, *addrs;
+        if (_stricmp((const char *)(g_base + d->Name), dll) != 0)
+            continue;
+        names = (IMAGE_THUNK_DATA *)(g_base + (d->OriginalFirstThunk ? d->OriginalFirstThunk : d->FirstThunk));
+        addrs = (IMAGE_THUNK_DATA *)(g_base + d->FirstThunk);
+        for (; names->u1.AddressOfData; names++, addrs++)
+        {
+            IMAGE_IMPORT_BY_NAME *ibn;
+            DWORD old;
+            void *orig;
+            if (IMAGE_SNAP_BY_ORDINAL(names->u1.Ordinal))
+                continue;
+            ibn = (IMAGE_IMPORT_BY_NAME *)(g_base + names->u1.AddressOfData);
+            if (strcmp((const char *)ibn->Name, func) != 0)
+                continue;
+            orig = (void *)addrs->u1.Function;
+            VirtualProtect(&addrs->u1.Function, sizeof(DWORD), PAGE_READWRITE, &old);
+            addrs->u1.Function = (DWORD)hook;
+            VirtualProtect(&addrs->u1.Function, sizeof(DWORD), old, &old);
+            return orig;
+        }
+    }
+    return NULL;
+}
+
+static DWORD rd32(const BYTE *p) { return *(const DWORD *)p; }
+
+// Apply one patch entry; returns a malloc'ed buffer of dst_len bytes or NULL.
+static BYTE *apply_entry(const BYTE *ops, DWORD count, const BYTE *src, DWORD srcLen, DWORD dstLen)
+{
+    BYTE *o = (BYTE *)malloc(dstLen ? dstLen : 1);
+    DWORD k, w = 0;
+    for (k = 0; o && k < count; k++)
+    {
+        BYTE t = *ops++;
+        DWORD off, len, i;
+        if (t == 2)
+        {
+            len = rd32(ops), ops += 4;
+            if (w + len > dstLen)
+                goto bad;
+            memcpy(o + w, ops, len);
+            ops += len;
+        }
+        else
+        {
+            off = rd32(ops), len = rd32(ops + 4), ops += 8;
+            if (w + len > dstLen || !srcLen)
+                goto bad;
+            if (t == 1)
+            {
+                if (off + len > srcLen)
+                    goto bad;
+                memcpy(o + w, src + off, len);
+            }
+            else
+            {
+                for (i = 0; i < len; i++)
+                    o[w + i] = (BYTE)(ops[i] + src[(off + i) % srcLen]);
+                ops += len;
+            }
+        }
+        w += len;
+    }
+    if (o && w == dstLen)
+        return o;
+bad:
+    free(o);
+    return NULL;
+}
+
+// Skip over the ops of one entry (to reach the next entry).
+static const BYTE *skip_ops(const BYTE *p, DWORD count)
+{
+    DWORD k;
+    for (k = 0; k < count; k++)
+    {
+        BYTE t = *p++;
+        p += t == 1 ? 8 : t == 2 ? 4 + rd32(p) : 8 + rd32(p + 4);
+    }
+    return p;
+}
+
+static void prepare_redirects(const char *gameDir, const char *dataDir)
+{
+    char path[MAX_PATH], stampPath[MAX_PATH], line[MAX_PATH + 64];
+    BYTE *patch, h[32];
+    const BYTE *p, *end;
+    DWORD size, n, i;
+    WIN32_FILE_ATTRIBUTE_DATA pa;
+    char *stamps = NULL; // old stamp file contents, searched by line
+    DWORD stampsLen = 0;
+    FILE *out;
+    int made = 0, reused = 0, already = 0, mismatch = 0;
+
+    _snprintf(path, sizeof path, "%s\\jp_patch.bin", dataDir);
+    patch = read_all(path, &size);
+    if (!patch)
+    {
+        jp_log("no %s (data files are used as they are)\n", path);
+        return;
+    }
+    if (size < 12 || memcmp(patch, "AJPATCH1", 8) != 0 || !GetFileAttributesExA(path, GetFileExInfoStandard, &pa))
+    {
+        jp_log("%s is broken\n", path);
+        free(patch);
+        return;
+    }
+    lstrcpynA(g_gameDirLower, gameDir, MAX_PATH);
+    lower_path(g_gameDirLower);
+    g_gameDirLen = (int)strlen(g_gameDirLower);
+    g_redir = (Redirect *)calloc(MAX_REDIRECTS, sizeof(Redirect));
+
+    // A stamp line per cached file: "rel <TAB> original size <TAB> original mtime <TAB> patch stamp".
+    // A cached file is reused while the original and the patch file are unchanged.
+    _snprintf(stampPath, sizeof stampPath, "%s\\cache\\stamp.txt", dataDir);
+    stamps = (char *)read_all(stampPath, &stampsLen);
+    if (stamps)
+    {
+        // keep a leading '\n' so that a search for "\n<line>" only matches whole lines
+        char *s = (char *)malloc(stampsLen + 2);
+        s[0] = '\n';
+        memcpy(s + 1, stamps, stampsLen);
+        s[stampsLen + 1] = 0;
+        free(stamps);
+        stamps = s;
+    }
+    make_parent_dirs(stampPath);
+    out = fopen(stampPath, "wb");
+
+    n = rd32(patch + 8);
+    p = patch + 12;
+    end = patch + size;
+    for (i = 0; i < n && p < end && g_redirCount < MAX_REDIRECTS; i++)
+    {
+        char rel[MAX_PATH], target[MAX_PATH], cache[MAX_PATH], *q;
+        WORD plen = *(const WORD *)p;
+        const BYTE *srcHash, *dstHash, *ops;
+        DWORD srcLen, dstLen, count;
+        WIN32_FILE_ATTRIBUTE_DATA fa;
+        p += 2;
+        if (plen >= MAX_PATH)
+            break;
+        memcpy(rel, p, plen);
+        rel[plen] = 0;
+        p += plen;
+        srcLen = rd32(p), srcHash = p + 4, p += 36;
+        dstLen = rd32(p), dstHash = p + 4, p += 36;
+        count = rd32(p), p += 4;
+        ops = p;
+        p = skip_ops(p, count);
+        for (q = rel; *q; q++)
+            if (*q == '/')
+                *q = '\\';
+        _snprintf(target, sizeof target, "%s\\%s", gameDir, rel);
+        _snprintf(cache, sizeof cache, "%s\\cache\\%s", dataDir, rel);
+        if (!GetFileAttributesExA(target, GetFileExInfoStandard, &fa))
+            continue;
+        _snprintf(line, sizeof line, "\n%s\t%lu\t%lu.%lu\t%lu.%lu\n", rel, fa.nFileSizeLow,
+                  fa.ftLastWriteTime.dwHighDateTime, fa.ftLastWriteTime.dwLowDateTime,
+                  pa.ftLastWriteTime.dwHighDateTime, pa.ftLastWriteTime.dwLowDateTime);
+        if (stamps && strstr(stamps, line) && GetFileAttributesExA(cache, GetFileExInfoStandard, &fa) &&
+            fa.nFileSizeLow == dstLen)
+        {
+            reused++;
+        }
+        else
+        {
+            DWORD olen;
+            BYTE *orig = read_all(target, &olen), *res = NULL;
+            if (!orig)
+                continue;
+            sha256(orig, olen, h);
+            if (olen == dstLen && memcmp(h, dstHash, 32) == 0)
+            {
+                already++; // the game file is already the Japanese one
+                free(orig);
+                continue;
+            }
+            if (olen == srcLen && memcmp(h, srcHash, 32) == 0)
+                res = apply_entry(ops, count, orig, olen, dstLen);
+            if (res)
+                sha256(res, dstLen, h);
+            if (!res || memcmp(h, dstHash, 32) != 0)
+            {
+                if (mismatch++ < 10)
+                    jp_log("not translated (the original differs): %s\n", rel);
+                free(orig);
+                free(res);
+                continue;
+            }
+            {
+                FILE *f;
+                make_parent_dirs(cache);
+                f = fopen(cache, "wb");
+                if (!f || fwrite(res, 1, dstLen, f) != dstLen)
+                {
+                    jp_log("cannot write %s\n", cache);
+                    if (f)
+                        fclose(f);
+                    free(orig);
+                    free(res);
+                    continue;
+                }
+                fclose(f);
+            }
+            made++;
+            free(orig);
+            free(res);
+        }
+        if (out)
+            fputs(line + 1, out);
+        lstrcpynA(g_redir[g_redirCount].rel, rel, MAX_PATH);
+        lower_path(g_redir[g_redirCount].rel);
+        lstrcpynA(g_redir[g_redirCount].cache, cache, MAX_PATH);
+        g_redirCount++;
+    }
+    if (out)
+        fclose(out);
+    free(stamps);
+    free(patch);
+    jp_log("data files: %d translated (%d built, %d cached), %d already Japanese, %d left as they are\n",
+           g_redirCount, made, reused, already, mismatch);
+    if (!g_redirCount)
+        return;
+    g_realCreateFileA = (CreateFileA_t)patch_iat("kernel32.dll", "CreateFileA", (void *)my_CreateFileA);
+    g_realCreateFileW = (CreateFileW_t)patch_iat("kernel32.dll", "CreateFileW", (void *)my_CreateFileW);
+    g_realFindFirstFileExA = (FindFirstFileExA_t)patch_iat("kernel32.dll", "FindFirstFileExA", (void *)my_FindFirstFileExA);
+    if (!g_realCreateFileA)
+        g_realCreateFileA = CreateFileA;
+    if (!g_realCreateFileW)
+        g_realCreateFileW = CreateFileW;
+    if (!g_realFindFirstFileExA)
+        g_realFindFirstFileExA = FindFirstFileExA;
+    jp_log("file redirect installed\n");
+}
+
 BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
 {
     if (reason == DLL_PROCESS_ATTACH)
     {
-        char dir[MAX_PATH], path[MAX_PATH], *p;
+        char dir[MAX_PATH], data[MAX_PATH], path[MAX_PATH], *p;
+        DWORD attr;
         DisableThreadLibraryCalls(inst);
         GetModuleFileNameA(inst, dir, MAX_PATH);
         p = strrchr(dir, '\\');
         if (p)
             *p = 0;
-        _snprintf(path, sizeof path, "%s\\avernum_jp.log", dir);
+        // Files of the patch live in the "avernum_jp" folder (drop-in layout); the game
+        // folder itself is still searched for them, as in the earlier layout.
+        _snprintf(data, sizeof data, "%s\\avernum_jp", dir);
+        attr = GetFileAttributesA(data);
+        if (attr == INVALID_FILE_ATTRIBUTES || !(attr & FILE_ATTRIBUTE_DIRECTORY))
+            lstrcpynA(data, dir, MAX_PATH);
+        _snprintf(path, sizeof path, "%s\\avernum_jp.log", data);
         g_log = fopen(path, "w");
         load_config(dir);
         g_base = (BYTE *)GetModuleHandleA(NULL);
         jp_log("Avernum JP hook loaded. base=%p face=%s\n", g_base, g_fontFace);
         install();
-        load_exe_strings(dir);
+        _snprintf(path, sizeof path, "%s\\avernum_jp_exe.tsv", data);
+        load_exe_strings(GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES ? data : dir);
+        prepare_redirects(dir, data);
         install_token_estimate_fix();
         install_named_str_fix();
         install_msgbox_hook();
