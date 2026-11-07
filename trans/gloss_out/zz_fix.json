@@ -1,0 +1,482 @@
+[
+{
+"en": "Sss",
+"ja": "シュー",
+"keep": false
+},
+{
+"en": "Spider",
+"ja": "蜘蛛",
+"keep": false
+},
+{
+"en": "Ach",
+"ja": "ああ",
+"keep": false
+},
+{
+"en": "Caius",
+"ja": "カイウス",
+"keep": true
+},
+{
+"en": "Slavering Imp",
+"ja": "涎垂らしの小鬼",
+"keep": true
+},
+{
+"en": "Mother Claudette",
+"ja": "マザー・クロデット",
+"keep": true
+},
+{
+"en": "Bench ND",
+"ja": "ベンチ",
+"keep": false
+},
+{
+"en": "Shelves D",
+"ja": "棚",
+"keep": false
+},
+{
+"en": "Wall Hanging D",
+"ja": "壁掛け",
+"keep": false
+},
+{
+"en": "Church Of The All",
+"ja": "全知なる善の教会",
+"keep": false
+},
+{
+"en": "Goodness",
+"ja": "善",
+"keep": false
+},
+{
+"en": "Hrror of the Fang",
+"ja": "牙の恐怖",
+"keep": true
+},
+{
+"en": "Portal Guard",
+"ja": "転移門の衛兵",
+"keep": true
+},
+{
+"en": "Avernite Prisoner",
+"ja": "アヴァーナムの囚人",
+"keep": true
+},
+{
+"en": "Blessed Athame",
+"ja": "祝福のアサメイ",
+"keep": true
+},
+{
+"en": "Mage",
+"ja": "魔術師",
+"keep": true
+},
+{
+"en": "Priest",
+"ja": "司祭",
+"keep": true
+},
+{
+"en": "Slime",
+"ja": "スライム",
+"keep": true
+},
+{
+"en": "Novak",
+"ja": "ノヴァク",
+"keep": true
+},
+{
+"en": "Commander Novak",
+"ja": "ノヴァク司令官",
+"keep": true
+},
+{
+"en": "Threescars",
+"ja": "三傷",
+"keep": false
+},
+{
+"en": "Graymold",
+"ja": "灰色カビ",
+"keep": true
+},
+{
+"en": "Graymold Salve",
+"ja": "灰色カビの軟膏",
+"keep": true
+},
+{
+"en": "Graymold Salve Recipe",
+"ja": "灰色カビ軟膏の作り方",
+"keep": true
+},
+{
+"en": "Graymold Salve UNUSED",
+"ja": "灰色カビの軟膏",
+"keep": true
+},
+{
+"en": "Chitrach Egg Sac",
+"ja": "チトラックの卵嚢",
+"keep": true
+},
+{
+"en": "Plated Chitrach",
+"ja": "装甲チトラック",
+"keep": true
+},
+{
+"en": "Warped Chitrach",
+"ja": "歪んだチトラック",
+"keep": true
+},
+{
+"en": "Jonnhalyn's Armor",
+"ja": "ジョナリンの防具店",
+"keep": true
+},
+{
+"en": "Jonnhalyn's Weapons",
+"ja": "ジョナリンの武器店",
+"keep": true
+},
+{
+"en": "Eunice",
+"ja": "ユーニス",
+"keep": true
+},
+{
+"en": "Doc",
+"ja": "ドク",
+"keep": true
+},
+{
+"en": "Sylow",
+"ja": "サイロウ",
+"keep": true
+},
+{
+"en": "Barrow Wight",
+"ja": "墳墓のワイト",
+"keep": true
+},
+{
+"en": "Burning Wight",
+"ja": "燃えるワイト",
+"keep": true
+},
+{
+"en": "Darkling Wight",
+"ja": "暗闇のワイト",
+"keep": true
+},
+{
+"en": "Split",
+"ja": "裂尾",
+"keep": false
+},
+{
+"en": "Slay Sss-Thsss.",
+"ja": "シュー・スサスの討伐",
+"keep": true
+},
+{
+"en": "Ward",
+"ja": "衛士",
+"keep": false
+},
+{
+"en": "Ward Sylow",
+"ja": "サイロウ衛士",
+"keep": true
+},
+{
+"en": "Ward Allison",
+"ja": "アリソン衛士",
+"keep": true
+},
+{
+"en": "Ward Renee",
+"ja": "ルネ衛士",
+"keep": true
+},
+{
+"en": "Ward Tesik",
+"ja": "テシク衛士",
+"keep": true
+},
+{
+"en": "Ward Herla",
+"ja": "ヘルラ衛士",
+"keep": true
+},
+{
+"en": "Mayor De",
+"ja": "デブリ町長",
+"keep": false
+},
+{
+"en": "De",
+"ja": "デ",
+"keep": false
+},
+{
+"en": "DeBry",
+"ja": "デブリ",
+"keep": true
+},
+{
+"en": "Mayor DeBry",
+"ja": "デブリ町長",
+"keep": true
+},
+{
+"en": "Split-Tail",
+"ja": "裂尾",
+"keep": true
+},
+{
+"en": "Bubbling Slime",
+"ja": "泡立つスライム",
+"keep": true
+},
+{
+"en": "Pick",
+"ja": "ツルハシ",
+"keep": false
+},
+{
+"en": "Saw",
+"ja": "ノコギリ",
+"keep": false
+},
+{
+"en": "Grah-Hoth",
+"ja": "グラー・ホス",
+"keep": true
+},
+{
+"en": "Claws of Grah-Hoth",
+"ja": "グラー・ホスの爪",
+"keep": true
+},
+{
+"en": "Destroy Grah-Hoth!",
+"ja": "グラー・ホスの破壊！",
+"keep": true
+},
+{
+"en": "Release Grah-Hoth.",
+"ja": "グラー・ホスの解放",
+"keep": true
+},
+{
+"en": "Sss-Thsss",
+"ja": "シュー・スサス",
+"keep": true
+},
+{
+"en": "Onyx Scepter",
+"ja": "オニキスの王笏",
+"keep": true
+},
+{
+"en": "Silver Circlet",
+"ja": "銀の額冠",
+"keep": true
+},
+{
+"en": "Ward Hodgson",
+"ja": "ホジソン衛士",
+"keep": true
+},
+{
+"en": "Hoth",
+"ja": "ホス",
+"keep": true
+},
+{
+"en": "Almarian",
+"ja": "アルマリアの",
+"keep": false
+},
+{
+"en": "Icarus",
+"ja": "イカロス",
+"keep": true
+},
+{
+"en": "mandrake",
+"ja": "マンドレイク",
+"keep": true
+},
+{
+"en": "cavewood",
+"ja": "洞窟木",
+"keep": true
+},
+{
+"en": "Ankh",
+"ja": "アンク",
+"keep": true
+},
+{
+"en": "ankh",
+"ja": "アンク",
+"keep": true
+},
+{
+"en": "circlet",
+"ja": "額冠",
+"keep": true
+},
+{
+"en": "Giant",
+"ja": "巨人",
+"keep": false
+},
+{
+"en": "Bertraud",
+"ja": "ベルトラン",
+"keep": true
+},
+{
+"en": "energetic herbs",
+"ja": "活力の薬草",
+"keep": true
+},
+{
+"en": "spiritual herbs",
+"ja": "霊験の薬草",
+"keep": true
+},
+{
+"en": "healing herbs",
+"ja": "治癒の薬草",
+"keep": true
+},
+{
+"en": "Strength",
+"ja": "筋力",
+"keep": false
+},
+{
+"en": "onyx",
+"ja": "オニキス",
+"keep": true
+},
+{
+"en": "Dervish",
+"ja": "修行僧",
+"keep": true
+},
+{
+"en": "Dervish Karzoth",
+"ja": "修行僧カーゾス",
+"keep": true
+},
+{
+"en": "Bite",
+"ja": "噛みつき",
+"keep": false
+},
+{
+"en": "Mage spells",
+"ja": "魔術",
+"keep": true
+},
+{
+"en": "Priest spells",
+"ja": "祈祷",
+"keep": true
+},
+{
+"en": "Mage spell",
+"ja": "魔術",
+"keep": true
+},
+{
+"en": "Priest spell",
+"ja": "祈祷",
+"keep": true
+},
+{
+"en": "Mage and Priest Spells",
+"ja": "魔術と祈祷",
+"keep": true
+},
+{
+"en": "Mage and Priest spells",
+"ja": "魔術と祈祷",
+"keep": true
+},
+{
+"en": "Casual",
+"ja": "カジュアル",
+"keep": true
+},
+{
+"en": "Normal",
+"ja": "ノーマル",
+"keep": false
+},
+{
+"en": "Hard",
+"ja": "ハード",
+"keep": false
+},
+{
+"en": "Torment",
+"ja": "トーメント",
+"keep": true
+},
+{
+"en": "Gazer",
+"ja": "ゲイザー",
+"keep": true
+},
+{
+"en": "Gazerskin Sandals",
+"ja": "ゲイザー革のサンダル",
+"keep": true
+},
+{
+"en": "Dark Lake",
+"ja": "暗湖",
+"keep": true
+},
+{
+"en": "Darklake",
+"ja": "暗湖",
+"keep": true
+},
+{
+"en": "scepter",
+"ja": "王笏",
+"keep": true
+},
+{
+"en": "Anastasia's Armor",
+"ja": "アナスタシアの防具店",
+"keep": true
+},
+{
+"en": "Royal Spire",
+"ja": "ロイヤル・スパイア",
+"keep": true
+},
+{
+"en": "The Royal Spire",
+"ja": "ロイヤル・スパイア",
+"keep": true
+}
+]
