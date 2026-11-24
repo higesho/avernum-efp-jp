@@ -12,7 +12,7 @@
 - `DirectSoundCreate` はシステムの dsound.dll にそのまま渡すため、音はそのまま出ます。
 
 ## 使い方（開発）
-1. `build.bat` で `dsound.dll` をビルドする（VS2022 Build Tools, x86）
+1. `build.bat` で `dsound.dll` をビルドする（VS2022 Build Tools, x86）（`build.bat test` で、ini の [debug] が効く試験版を `build\test\dsound.dll` に作る。試験版は配布しない）
 2. `dsound.dll` をゲームフォルダ（Avernum.exe と同じ場所）にコピーする
 3. 翻訳は `tools/build_scripts.py`、`tools/scen_tool.py build`、`tools/make_images.py`、`tools/make_maps.py` で
    日本語版のファイルを作る（出力先はゲームフォルダでも、ゲームフォルダと同じ形の作業フォルダでもよい）
@@ -45,7 +45,7 @@ DLL が使う exe 内のアドレス（関数 6 個、変数 15 個、パッチ�
   ゲームは何も変えずに英語のまま起動します（ログに `not supported`）。
 - 画面の文字列（`avernum_jp_exe.tsv`）は、Steam 版のアドレスに同じ英文がなければ、データ領域から同じ英文を探します。
   短い英文（`!` など）はデータ中に偶然現れるため、「その文字列を指すポインタの数」（`refs` 列）が一致するものだけを使います。
-- 試験用に `avernum_jp.ini` の `[debug] force_scan=1` で Steam 版でも探索を強制でき、`force_scan=2` で
+- 試験版（`build.bat test`）では `avernum_jp.ini` の `[debug] force_scan=1` で Steam 版でも探索を強制でき、`force_scan=2` で
   見つからなかった場合（英語のまま起動）を再現できます。Steam 版では、探索の結果がすべて Steam 版のアドレスと一致することを確認済みです。
 
 ## 元に戻す

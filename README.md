@@ -29,7 +29,7 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
 ## リポジトリの中身
 | パス | 内容 |
 |---|---|
-| `avernum_jp.c`, `dsound.def`, `build.bat` | 日本語表示 DLL（DirectSound の代理 DLL）。VS2022 Build Tools（x86）でビルド |
+| `avernum_jp.c`, `avernum_jp.rc`, `dsound.def`, `build.bat` | 日本語表示 DLL（DirectSound の代理 DLL）。VS2022 Build Tools（x86）でビルド（`build.bat test` は試験版を `build\test\` に作る。配布しない） |
 | `exe_strings.tsv` | 実行ファイル内の文字列の訳（ゲームには `avernum_jp_exe.tsv` として置く） |
 | `trans/` | スクリプト本文の訳（`ja/`）、用語集、口調メモ、文体の決まり（`STYLE.md`） |
 | `trans_exe/`, `trans_scen/` | 実行ファイルの文字列とシナリオデータの訳 |
@@ -45,7 +45,7 @@ Spiderweb Software の RPG「Avernum: Escape From the Pit」（Steam 版）を�
 
 ## 配布 ZIP の作り方
 ```
-python -I tools/build_release.py <元のファイルのフォルダ> <日本語化したファイルのフォルダ> <出力先> v0.9.2 https://higesho.github.io/avernum-efp-jp/
+python -I tools/build_release.py <元のファイルのフォルダ> <日本語化したファイルのフォルダ> <出力先> v0.9.3 https://higesho.github.io/avernum-efp-jp/
 ```
 `tools/make_patch.py` が元のファイルとの差分（`avernum_jp/jp_patch.bin`）を作ります。文章は差分として翻訳部分だけを、
 画像は元の画像との差として持つため、ZIP 単体ではゲームの内容を取り出せません。
